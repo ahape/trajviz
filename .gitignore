@@ -1,0 +1,9 @@
+# PowerShell: Exclude packaged modules
+*.zip
+
+# PowerShell: Exclude .NET assemblies from source
+*.dll
+
+# Safe places to put things
+.worktrees/
+.local/

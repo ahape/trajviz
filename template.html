@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{PAGE_TITLE}}</title>
+  <style>
+    /* JetBrains Darcula Theme */
+    :root {
+      --bg-main: #2b2b2b;
+      --bg-header: #3c3f41;
+      --bg-command: #2b2b2b;
+      --bg-output: #1e1e1e;
+      --bg-code-box: #313335;
+      --bg-output-box: #171717;
+      --border-main: #323232;
+      --border-divider: #3c3f41;
+      --text-main: #a9b7c6;
+      --text-muted: #808080;
+      --text-light: #dfdfdf;
+      --accent-badge: #2f4053;
+      --accent-badge-text: #a5c0e0;
+      --reasoning-border: #5b7da3;
+      --reasoning-tag: #7ca8d6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Sticky Header */
+    header.docco-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--bg-header);
+      border-bottom: 2px solid var(--border-main);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      padding: 14px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-title-group h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-light);
+      letter-spacing: -0.2px;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      background: var(--accent-badge);
+      color: var(--accent-badge-text);
+      border: 1px solid #3b5066;
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 0.75rem;
+      font-family: ui-monospace, 'JetBrains Mono', Consolas, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Global View Mode Switcher */
+    .view-toggle-bar {
+      display: inline-flex;
+      align-items: center;
+      background: #212121;
+      border: 1px solid #3c3f41;
+      border-radius: 5px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .toggle-pill {
+      background: transparent;
+      border: none;
+      color: #888888;
+      padding: 4px 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: ui-monospace, 'JetBrains Mono', Consolas, monospace;
+      transition: all 0.15s ease;
+    }
+
+    .toggle-pill:hover {
+      color: #dfdfdf;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .toggle-pill.active {
+      background: #4e6a8e;
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Column Legend Bar */
+    .column-legend-bar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      background-color: #262626;
+      border-bottom: 1px solid var(--border-divider);
+      position: sticky;
+      top: 67px;
+      z-index: 90;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .column-legend-bar .legend-col {
+      padding: 8px 24px;
+    }
+
+    .column-legend-bar .legend-left {
+      color: #dfdfdf;
+      border-right: 1px solid var(--border-divider);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .column-legend-bar .legend-right {
+      color: #999999;
+      background-color: #1b1b1b;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Container & Rows */
+    .docco-container {
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .docco-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-bottom: 1px solid var(--border-main);
+      transition: background-color 0.15s ease;
+    }
+
+    .docco-row:hover {
+      background-color: rgba(255, 255, 255, 0.015);
+    }
+
+    .column {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .command-col {
+      background-color: var(--bg-command);
+      border-right: 1px solid var(--border-divider);
+      padding: 16px 24px 20px 24px;
+    }
+
+    .output-col {
+      background-color: var(--bg-output);
+      padding: 16px 24px 20px 24px;
+    }
+
+    /* Column Header */
+    .col-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .cmd-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .step-badge {
+      display: inline-block;
+      color: #666666;
+      font-family: ui-monospace, 'JetBrains Mono', Consolas, monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: #242424;
+      border: 1px solid #333333;
+    }
+
+    .cmd-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #777777;
+    }
+
+    .output-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #666666;
+    }
+
+    /* Row Mini Toggle */
+    .row-toggle {
+      display: inline-flex;
+      align-items: center;
+      background: #232526;
+      border: 1px solid #3c3f41;
+      border-radius: 4px;
+      padding: 1px;
+      gap: 1px;
+    }
+
+    .row-toggle-btn {
+      background: transparent;
+      border: none;
+      color: #777777;
+      padding: 2px 7px;
+      font-size: 0.68rem;
+      font-family: ui-monospace, 'JetBrains Mono', Consolas, monospace;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .row-toggle-btn:hover {
+      color: #bbbbbb;
+    }
+
+    .row-toggle-btn.active {
+      background: #3c3f41;
+      color: #d2e4f8;
+    }
+
+    /* Copy Button */
+    .copy-btn {
+      background: #3c3f41;
+      color: #a9b7c6;
+      border: 1px solid #555555;
+      border-radius: 3px;
+      padding: 2px 9px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s ease;
+    }
+
+    .copy-btn:hover {
+      background: #4e5254;
+      color: #ffffff;
+      border-color: #666666;
+    }
+
+    .copy-btn.copied {
+      background: #2e5939;
+      color: #a8d5a2;
+      border-color: #4b8054;
+    }
+
+    /* Pre & Content Containers */
+    .code-container, .output-container {
+      flex: 1;
+      display: flex;
+      min-width: 0;
+    }
+
+    pre {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.6;
+      margin: 0;
+      width: 100%;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .darcula-code {
+      color: var(--text-main);
+      padding: 10px 14px;
+      background-color: var(--bg-code-box);
+      border: 1px solid #3c3f41;
+      border-radius: 4px;
+    }
+
+    .darcula-code code {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    .output-content {
+      color: #bbbbbb;
+      padding: 10px 14px;
+      background-color: var(--bg-output-box);
+      border: 1px solid #292929;
+      border-radius: 4px;
+    }
+
+    .output-content code {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    .no-output {
+      color: #666666;
+      font-style: italic;
+      padding: 12px 14px;
+      background-color: var(--bg-output-box);
+      border: 1px solid #292929;
+      border-radius: 4px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Reasoning Container */
+    .darcula-reasoning {
+      display: none;
+      color: #d4dbe4;
+      background-color: var(--bg-code-box);
+      border: 1px solid #3c3f41;
+      border-left: 3px solid var(--reasoning-border);
+      border-radius: 4px;
+      padding: 14px 18px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      font-size: 13.5px;
+      line-height: 1.65;
+      width: 100%;
+      word-break: break-word;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .darcula-reasoning .reasoning-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--reasoning-tag);
+      margin-bottom: 8px;
+    }
+
+    .darcula-reasoning p {
+      margin: 0;
+      color: #dfdfdf;
+    }
+
+    .darcula-reasoning p + p {
+      margin-top: 10px;
+    }
+
+    .darcula-reasoning .empty-reasoning {
+      color: #777777;
+      font-style: italic;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-main);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4e5254;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #606366;
+    }
+
+    /* Responsive */
+    @media (max-width: 960px) {
+      .column-legend-bar {
+        display: none;
+      }
+      .docco-row {
+        grid-template-columns: 1fr;
+      }
+      .command-col {
+        border-right: none;
+        border-bottom: 1px solid var(--border-divider);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="docco-header">
+    <div class="header-title-group">
+      <h1>{{PAGE_TITLE}}</h1>
+    </div>
+    <div class="header-badges">
+      <div class="view-toggle-bar" title="Press T or R to toggle globally">
+        <button class="toggle-pill active" id="global-toggle-cmd" onclick="setGlobalMode('command')">COMMAND</button>
+        <button class="toggle-pill" id="global-toggle-reasoning" onclick="setGlobalMode('reasoning')">REASONING</button>
+      </div>
+      <span class="badge" id="cmd-count-badge">{{COMMAND_COUNT}}</span>
+    </div>
+  </header>
+
+  <div class="column-legend-bar">
+    <div class="legend-col legend-left">
+      <span id="legend-left-label">Command</span>
+      <div class="view-toggle-bar">
+        <button class="toggle-pill active" id="legend-toggle-cmd" onclick="setGlobalMode('command')">CMD</button>
+        <button class="toggle-pill" id="legend-toggle-reasoning" onclick="setGlobalMode('reasoning')">REASONING</button>
+      </div>
+    </div>
+    <div class="legend-col legend-right">
+      <span>Output / Result (Raw Text)</span>
+    </div>
+  </div>
+
+  <main class="docco-container">
+{{ROWS}}
+  </main>
+
+  <script>
+    let currentGlobalMode = 'command';
+
+    function setGlobalMode(mode) {
+      currentGlobalMode = mode;
+      const isCmd = mode === 'command';
+
+      // Update toggle buttons in header & legend
+      ['global-toggle-cmd', 'legend-toggle-cmd'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', isCmd);
+      });
+      ['global-toggle-reasoning', 'legend-toggle-reasoning'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('active', !isCmd);
+      });
+
+      const legendLabel = document.getElementById('legend-left-label');
+      if (legendLabel) {
+        legendLabel.textContent = isCmd ? 'Command' : 'Reasoning';
+      }
+
+      // Update all rows dynamically
+      document.querySelectorAll('.docco-row').forEach(row => {
+        const stepNum = row.getAttribute('data-step');
+        if (stepNum) applyRowMode(stepNum, mode);
+      });
+    }
+
+    function setRowMode(stepNum, mode) {
+      applyRowMode(stepNum, mode);
+    }
+
+    function applyRowMode(stepNum, mode) {
+      const isCmd = mode === 'command';
+      const cmdPre = document.getElementById('cmd-pre-' + stepNum);
+      const reasoningBox = document.getElementById('reasoning-box-' + stepNum);
+      const label = document.getElementById('label-' + stepNum);
+      const btnCmd = document.getElementById('row-btn-cmd-' + stepNum);
+      const btnReasoning = document.getElementById('row-btn-reasoning-' + stepNum);
+
+      if (cmdPre) cmdPre.style.display = isCmd ? 'block' : 'none';
+      if (reasoningBox) reasoningBox.style.display = isCmd ? 'none' : 'block';
+      if (label) label.textContent = isCmd ? 'Command' : 'Reasoning';
+      if (btnCmd) btnCmd.classList.toggle('active', isCmd);
+      if (btnReasoning) btnReasoning.classList.toggle('active', !isCmd);
+    }
+
+    function copyCode(btn) {
+      const section = btn.closest('.command-col');
+      const reasoningBox = section.querySelector('.darcula-reasoning');
+      const codeEl = section.querySelector('.darcula-code code');
+      let text = '';
+
+      if (reasoningBox && window.getComputedStyle(reasoningBox).display !== 'none') {
+        const paras = Array.from(reasoningBox.querySelectorAll('p:not(.empty-reasoning)'))
+          .map(p => (p.innerText || p.textContent).trim())
+          .filter(Boolean);
+        text = paras.length ? paras.join('\n\n') : '';
+      } else if (codeEl) {
+        text = (codeEl.innerText || codeEl.textContent).trim();
+      }
+
+      if (!text) return;
+
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = originalText;
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy', err);
+      });
+    }
+
+    // Keyboard shortcut: Press 'T' or 'R' to toggle all between Command and Reasoning
+    document.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'r' || e.key === 'R' || e.key === 't' || e.key === 'T') {
+        const nextMode = currentGlobalMode === 'command' ? 'reasoning' : 'command';
+        setGlobalMode(nextMode);
+      }
+    });
+  </script>
+</body>
+</html>
