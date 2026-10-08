@@ -1,3 +1,6 @@
+/*.html
+!/template.html
+
 # PowerShell: Exclude packaged modules
 *.zip
 
